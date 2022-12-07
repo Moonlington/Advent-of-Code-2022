@@ -84,8 +84,8 @@ func (d *Directory) getSize() int {
 }
 
 func (d *Directory) forAllSubDirectories(function func(d *Directory)) {
+	function(d)
 	for _, subdirectory := range d.Subdirectories {
-		function(subdirectory)
 		subdirectory.forAllSubDirectories(function)
 	}
 }
@@ -130,7 +130,6 @@ func main() {
 			part1Solution += size
 		}
 	}
-	summer(Filesystem)
 	Filesystem.forAllSubDirectories(summer)
 	fmt.Println(part1Solution)
 
@@ -147,7 +146,6 @@ func main() {
 			smallestDirectoryToDelete = d
 		}
 	}
-	finder(Filesystem)
 	Filesystem.forAllSubDirectories(finder)
 	part2Solution := smallestDirectoryToDelete.getSize()
 	fmt.Println(part2Solution)
