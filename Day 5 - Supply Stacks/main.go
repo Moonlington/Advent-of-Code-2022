@@ -1,0 +1,75 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"regexp"
+	"strconv"
+)
+
+var Stacks []*Stack = []*Stack{}
+
+type Stack struct {
+	Values []string
+}
+
+func (s *Stack) move(amount int, o *Stack) {
+	var moving []string
+	s.Values, moving = s.Values[amount:], append([]string(nil), s.Values[:amount]...)
+	replaced := append(moving, o.Values...)
+	o.Values = replaced
+}
+
+func main() {
+	inputFile, err := os.Open("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer inputFile.Close()
+	scanner := bufio.NewScanner(inputFile)
+	instructionMode := false
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			instructionMode = true
+			continue
+		}
+		if !instructionMode {
+			packageRegex := regexp.MustCompile(`(?:   )|(?:\[([A-Z]+)\] ?)`)
+			piles := packageRegex.FindAllStringSubmatch(line, -1)
+			for len(Stacks) < len(piles) {
+				Stacks = append(Stacks, &Stack{
+					Values: []string{},
+				})
+			}
+			for i, v := range piles {
+				if v[1] != "" {
+					Stacks[i] = &Stack{Values: append(Stacks[i].Values, v[1])}
+				}
+			}
+		} else {
+			executeOrder(line)
+		}
+	}
+	for _, v := range Stacks {
+		if len(v.Values) != 0 {
+			fmt.Print(v.Values[0])
+		}
+	}
+	fmt.Println() // Part 1 Solution
+	// fmt.Println(sumContains) // Part 1 Solution
+	// fmt.Println(sumOverlap)  // Part 2 Solution
+}
+
+func executeOrder(line string) {
+	orderRegex := regexp.MustCompile(`move (\d+) from (\d+) to (\d+)`)
+	match := orderRegex.FindStringSubmatch(line)
+	if match == nil {
+		panic("no match")
+	}
+	index, _ := strconv.Atoi(match[2])
+	amount, _ := strconv.Atoi(match[1])
+	oindex, _ := strconv.Atoi(match[3])
+	Stacks[index-1].move(amount, Stacks[oindex-1])
+}
