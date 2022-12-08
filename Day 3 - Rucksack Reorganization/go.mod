@@ -1,3 +1,3 @@
-module AOC3
+module AOC/Day3
 
 go 1.19
